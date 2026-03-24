@@ -1,7 +1,17 @@
 import { AuthForm } from "@/components/AuthForm"
 import { ThemeToggle } from "@/components/ThemeToggle"
+import { useEffect } from "react"
 
 export default function SignUpPage() {
+    useEffect(() => {
+        const previousTitle = document.title
+        document.title = "Create an account | Acme"
+
+        return () => {
+            document.title = previousTitle
+        }
+    }, [])
+
     return (
         <div className="relative flex min-h-screen items-center justify-center bg-neutral-50 px-4 dark:bg-background" data-testid="signup-page">
             <div className="fixed bottom-4 right-4">
