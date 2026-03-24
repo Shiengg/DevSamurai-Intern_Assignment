@@ -10,12 +10,12 @@ export class AuthController {
 
     @Post('signup')
     async signup(@Body() signupDto: SignupDto) {
-        return this.authService.signup(signupDto);
+        return this.authService.signUp(signupDto);
     }
 
-    @Post('signin')
+    @Post('login')
     @HttpCode(HttpStatus.OK)
-    async signin(@Body() signinDto: SigninDto) {
-        return this.authService.signin(signinDto);
+    async login(@Body() signinDto: SigninDto) {
+        return this.authService.login(signinDto);
     }
 }

@@ -29,7 +29,7 @@ export class AuthService {
         return userDataWithoutPassword;
     }
 
-    async signup(SignupDto: SignupDto) {
+    async signUp(SignupDto: SignupDto) {
         const { name, email, password } = SignupDto;
 
         //Check if user already exists
@@ -63,7 +63,7 @@ export class AuthService {
         }
     }
 
-    async signin(SigninDto: SigninDto) {
+    async login(SigninDto: SigninDto) {
         const { email, password } = SigninDto;
 
         //Find user
