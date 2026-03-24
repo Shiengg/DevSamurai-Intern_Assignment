@@ -1,9 +1,14 @@
+import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
-import { UserNotFoundException, UserAlreadyExistsException } from '../common/exceptions/auth.exceptions';
+import {
+    UserNotFoundException,
+    UserAlreadyExistsException,
+    InvalidCredentialsException
+} from '../common/exceptions/auth.exceptions';
 
 
 @Injectable()
@@ -48,6 +53,34 @@ export class AuthService {
         });
 
         //Generate JWT token
+        const payload = { sub: user.id, email: user.email, name: user.name };
+        const token = this.jwtService.sign(payload);
+
+        const { passwordhash, ...userDataWithoutPassword } = user;
+        return {
+            user: userDataWithoutPassword,
+            token,
+        }
+    }
+
+    async signin(SigninDto: SigninDto) {
+        const { email, password } = SigninDto;
+
+        //Find user
+        const user = await this.prisma.user.findUnique({
+            where: { email },
+        })
+        if (!user) {
+            throw new InvalidCredentialsException();
+        }
+
+        //Compare password
+        const isPasswordValid = await bcrypt.compare(password, user.passwordhash);
+
+        if (!isPasswordValid) {
+            throw new InvalidCredentialsException();
+        }
+
         const payload = { sub: user.id, email: user.email, name: user.name };
         const token = this.jwtService.sign(payload);
 
