@@ -25,3 +25,16 @@ export class UserAlreadyExistsException extends HttpException {
         )
     }
 }
+
+export class InvalidCredentialsException extends HttpException {
+    constructor() {
+        super(
+            {
+                statusCode: HttpStatus.UNAUTHORIZED,
+                message: 'Invalid credentials. Please check your email and password.',
+                error: 'InvalidCredentialsException',
+            },
+            HttpStatus.UNAUTHORIZED,
+        )
+    }
+}

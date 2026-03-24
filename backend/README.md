@@ -25,6 +25,12 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Auth endpoints
+
+- `POST /auth/signup`
+- `POST /auth/login`
+- `GET /me` (protected route, bearer token required)
+
 ## Project setup
 
 ```bash
