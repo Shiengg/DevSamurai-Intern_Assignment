@@ -20,3 +20,30 @@ model user {
   createdat    DateTime @default(now())
   updatedat    DateTime @updatedAt
 }
+
+model dashboard_metric {
+  id                       Int      @id @default(autoincrement())
+  date                     DateTime @unique @db.Date
+  emails_sent              Int
+  delivery_rate            Float
+  subscribers              Int
+  bounce_rate              Float
+  emails_sent_change_pct   Float
+  delivery_rate_change_pct Float
+  subscribers_change_pct   Float
+  bounce_rate_change_pct   Float
+  createdat                DateTime @default(now())
+  updatedat                DateTime @updatedAt
+}
+
+model email_daily_stat {
+  id            Int      @id @default(autoincrement())
+  date          DateTime @unique @db.Date
+  transactional Int
+  marketing     Int
+  performance   Float
+  open_rate     Float
+  click_rate    Float
+  createdat     DateTime @default(now())
+  updatedat     DateTime @updatedAt
+}
