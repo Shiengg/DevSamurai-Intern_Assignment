@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '@/store/store'
-import { setTheme } from '@/store/slices/themeSlice'
+import { applyThemeToDocument, setTheme } from '@/store/slices/themeSlice'
 
 interface ThemeProviderProps {
     children: React.ReactNode
@@ -16,7 +16,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         const initializeTheme = () => {
             try {
                 const saved = localStorage.getItem('theme')
-                if (saved === 'light' || saved === 'dark') {
+                if (saved === 'light' || saved === 'dark' || saved === 'system') {
                     dispatch(setTheme(saved))
                 } else {
                     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -31,9 +31,16 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     }, [dispatch])
 
     useEffect(() => {
-        const root = document.documentElement
-        root.classList.remove('light', 'dark')
-        root.classList.add(theme)
+        if (theme === 'system') {
+            const mq = window.matchMedia('(prefers-color-scheme: dark)')
+            const sync = () => {
+                applyThemeToDocument('system')
+            }
+            sync()
+            mq.addEventListener('change', sync)
+            return () => mq.removeEventListener('change', sync)
+        }
+        applyThemeToDocument(theme)
     }, [theme])
 
     return <>{children}</>

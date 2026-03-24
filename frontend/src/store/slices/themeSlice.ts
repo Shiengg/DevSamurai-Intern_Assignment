@@ -1,26 +1,37 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 
+export type ThemePreference = 'light' | 'dark' | 'system'
+
 interface ThemeState {
-  theme: 'light' | 'dark'
+  theme: ThemePreference
 }
 
-const getInitialTheme = (): 'light' | 'dark' => {
+export function applyThemeToDocument(preference: ThemePreference) {
+  const root = document.documentElement
+  root.classList.remove('light', 'dark')
+  if (preference === 'system') {
+    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    root.classList.add(dark ? 'dark' : 'light')
+  } else {
+    root.classList.add(preference === 'dark' ? 'dark' : 'light')
+  }
+}
+
+const getInitialTheme = (): ThemePreference => {
   try {
     const saved = localStorage.getItem('theme')
-    if (saved === 'light' || saved === 'dark') {
-      const root = document.documentElement
-      root.classList.toggle('dark', saved === 'dark')
+    if (saved === 'light' || saved === 'dark' || saved === 'system') {
+      applyThemeToDocument(saved)
       return saved
     }
     const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
     const theme = prefersDark ? 'dark' : 'light'
-    const root = document.documentElement
-    root.classList.toggle('dark', theme === 'dark')
+    applyThemeToDocument(theme)
     return theme
   } catch {
-    const root = document.documentElement
-    root.classList.add('dark')
+    document.documentElement.classList.remove('light', 'dark')
+    document.documentElement.classList.add('dark')
     return 'dark'
   }
 }
@@ -33,23 +44,23 @@ const themeSlice = createSlice({
   name: 'theme',
   initialState,
   reducers: {
-    setTheme: (state, action: PayloadAction<'light' | 'dark'>) => {
+    setTheme: (state, action: PayloadAction<ThemePreference>) => {
       state.theme = action.payload
       try {
         localStorage.setItem('theme', action.payload)
-        const root = document.documentElement
-        root.classList.toggle('dark', action.payload === 'dark')
+        applyThemeToDocument(action.payload)
       } catch {
         // Ignore localStorage errors
       }
     },
     toggleTheme: (state) => {
-      const newTheme = state.theme === 'light' ? 'dark' : 'light'
+      const prefersDark =
+        document.documentElement.classList.contains('dark')
+      const newTheme = prefersDark ? 'light' : 'dark'
       state.theme = newTheme
       try {
         localStorage.setItem('theme', newTheme)
-        const root = document.documentElement
-        root.classList.toggle('dark', newTheme === 'dark')
+        applyThemeToDocument(newTheme)
       } catch {
         // Ignore localStorage errors
       }
