@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { GlobalExceptionFilter } from './common/filters/global_exceptions.filter';
 import { APP_FILTER } from '@nestjs/core';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
       isGlobal: true,
     }),
     PrismaModule,
-    AuthModule
+    AuthModule,
+    DashboardModule
   ],
   controllers: [AppController],
   providers: [
