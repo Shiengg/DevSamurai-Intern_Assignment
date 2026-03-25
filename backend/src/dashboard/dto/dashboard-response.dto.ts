@@ -12,6 +12,8 @@ export class DashboardKpisDto {
 export class DashboardEmailSentPointDto {
   date: string;
   value: number;
+  transactional: number;
+  marketing: number;
 }
 
 export class DashboardPerformancePointDto {

@@ -3,19 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { authService } from '@/services/authService';
 import { setUser } from '@/feature/auth/authSlice';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import Sidebar from '@/components/Sidebar';
-
-interface AuthUser {
-    id: number;
-    name: string;
-    email: string;
-    createdat: string;
-    updatedat: string;
-}
+import AppHeader from '@/components/AppHeader';
+import DashboardOverview from '@/components/DashboardOverview';
 
 export default function DashboardPage() {
-    const [user, setUserState] = useState<AuthUser | null>(null);
     const [loading, setLoading] = useState(true);
     const [apiCallMade, setApiCallMade] = useState(false)
     const navigate = useNavigate();
@@ -35,7 +28,6 @@ export default function DashboardPage() {
                     try {
                         const cachedUser = JSON.parse(userStr);
                         if (cachedUser?.id && cachedUser?.email) {
-                            setUserState(cachedUser);
                             dispatch(setUser({
                                 id: cachedUser.id,
                                 name: cachedUser.name,
@@ -53,8 +45,6 @@ export default function DashboardPage() {
                     try {
                         const response = await authService.fetchUser();
                         const userData = response.user;
-
-                        setUserState(userData);
 
                         localStorage.setItem('user', JSON.stringify(userData));
 
@@ -98,6 +88,14 @@ export default function DashboardPage() {
     return (
         <SidebarProvider defaultOpen={true} data-testid="dashboard-page">
             <Sidebar />
+            <SidebarInset>
+                <AppHeader />
+
+                {/* Content */}
+                <main className="min-h-0 min-w-0 flex-1 overflow-auto bg-[#fafafa] pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] text-foreground dark:bg-background">
+                    <DashboardOverview />
+                </main>
+            </SidebarInset>
         </SidebarProvider>
     )
 }

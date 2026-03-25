@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { seedDashboardDemoData } from './dashboard-demo-seed';
 import { GetDashboardQueryDto } from './dto/dashboard-query.dto';
 import {
   DashboardEmailSentPointDto,
@@ -14,6 +15,17 @@ export class DashboardService {
   constructor(
     private readonly prisma: PrismaService
   ) { }
+
+  async runDemoSeedFromApi(): Promise<{ ok: true; daysSeeded: number }> {
+    if (process.env.ENABLE_DASHBOARD_DEMO_SEED !== 'true') {
+      throw new ForbiddenException(
+        'Dashboard demo seed is disabled. Set ENABLE_DASHBOARD_DEMO_SEED=true on the server to enable.',
+      );
+    }
+    await seedDashboardDemoData(this.prisma);
+    const count = await this.prisma.email_daily_stat.count();
+    return { ok: true, daysSeeded: count };
+  }
 
   async getDashboard(query: GetDashboardQueryDto): Promise<GetDashboardResponseDto> {
     const latestMetric = await this.prisma.dashboard_metric.findFirst({
@@ -29,6 +41,8 @@ export class DashboardService {
     const emailSentSeries: DashboardEmailSentPointDto[] = seriesRows.map((row) => ({
       date: row.date.toISOString(),
       value: row.transactional + row.marketing,
+      transactional: row.transactional,
+      marketing: row.marketing,
     }));
 
     const performanceSeries: DashboardPerformancePointDto[] = seriesRows.map((row) => ({
