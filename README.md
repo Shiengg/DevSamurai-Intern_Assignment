@@ -320,15 +320,6 @@ Sau khi dùng xong nên tắt lại hoặc chỉ bật trên staging.
 | `ENABLE_DASHBOARD_DEMO_SEED` | Backend | `true` chỉ khi cần seed qua API |
 | `VITE_API_URL` | Frontend (build time) | URL công khai của API |
 
-### Kiểm thử (backend)
-
-```bash
-cd backend
-npm test
-npm run test:e2e
-```
-
-Frontend hiện không có suite test tự động trong repo; có thể chạy `npm run lint` ở từng package.
 
 ### Cấu trúc thư mục (rút gọn)
 
