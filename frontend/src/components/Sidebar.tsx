@@ -19,6 +19,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import OrgMenu from '@/components/OrigiMenu'
 import UserMenu from '@/components/UserMenu'
+import { CommandMenuDialog } from '@/components/CommandMenuDialog'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -34,8 +35,9 @@ import {
 } from '@/components/ui/sidebar'
 import type { RootState } from '@/store/store'
 import { setOrganizationName } from '@/store/slices/organizationSlice'
-import { setUserDisplay, setUser } from '@/feature/auth/authSlice'
-import { createOrganizationSchema, renameUserSchema, type CreateOrganizationForm, type RenameUserForm } from '@/schemas/formSchemas'
+import { logout, setUser } from '@/feature/auth/authSlice'
+import { authService } from '@/services/authService'
+import { createOrganizationSchema, type CreateOrganizationForm } from '@/schemas/formSchemas'
 import { cn } from '@/lib/utils'
 
 const navIconClass =
@@ -122,16 +124,9 @@ export default function Sidebar() {
     }, [menuOpen, isCollapsed])
 
     const [userMenuOpen, setUserMenuOpen] = useState(false)
+    const [commandMenuOpen, setCommandMenuOpen] = useState(false)
     const userBtnRef = useRef<HTMLButtonElement | null>(null)
     const [userMenuWidth, setUserMenuWidth] = useState<number | undefined>(undefined)
-    const [userRenameOpen, setUserRenameOpen] = useState(false)
-
-    const userForm = useForm<RenameUserForm>({
-        resolver: zodResolver(renameUserSchema),
-        defaultValues: {
-            display: user?.displayName || ''
-        }
-    })
 
     useLayoutEffect(() => {
         if (userMenuOpen && userBtnRef.current) {
@@ -189,29 +184,17 @@ export default function Sidebar() {
         createOrgForm.reset({ name: data.name })
     }
 
-    const handleUserRename = (data: RenameUserForm) => {
-        dispatch(setUserDisplay(data.display))
-        setUserRenameOpen(false)
-        userForm.reset({ display: data.display })
-    }
-
     // Update form default values when Redux state changes
     useEffect(() => {
         createOrgForm.reset({ name: orgName })
     }, [orgName, createOrgForm])
-
-    useEffect(() => {
-        if (user?.displayName) {
-            userForm.reset({ display: user.displayName })
-        }
-    }, [user?.displayName, userForm])
 
     return (
         <ShadcnSidebar
             collapsible="icon"
             className="overflow-visible border-r border-[#EAEAEA] bg-[#F9F9F9] dark:border-sidebar-border dark:bg-sidebar [&_[data-slot=sidebar-inner]]:bg-[#F9F9F9] dark:[&_[data-slot=sidebar-inner]]:bg-sidebar"
         >
-            <SidebarHeader className="px-4 pt-2 pb-4">
+            <SidebarHeader className="px-4 pb-4 pt-[max(0.5rem,env(safe-area-inset-top,0px))]">
                 <div className="relative">
                     <button
                         ref={orgBtnRef}
@@ -362,22 +345,27 @@ export default function Sidebar() {
                             leftOffset={0}
                             userDisplayName={user?.displayName || 'User'}
                             userEmail={user?.email}
-                            onRename={() => {
-                                userForm.reset({ display: user?.displayName || 'User' })
-                                setUserRenameOpen(true)
-                                setUserMenuOpen(false)
+                            onSignOut={() => {
+                                authService.removeToken()
+                                dispatch(logout())
+                                navigate('/auth/sign-in')
                             }}
-                            onSignOut={() => { try { localStorage.removeItem('token') } catch { /* ignore */ }; navigate('/auth/sign-in') }}
                             onClose={() => setUserMenuOpen(false)}
                             triggerRef={userBtnRef}
+                            onOpenCommandMenu={() => {
+                                setCommandMenuOpen(true)
+                                setUserMenuOpen(false)
+                            }}
                         />
                     )}
                 </div>
             </SidebarFooter>
 
+            <CommandMenuDialog open={commandMenuOpen} onOpenChange={setCommandMenuOpen} />
+
             {/* Create Organization Dialog */}
             <Dialog open={createOrgOpen} onOpenChange={setCreateOrgOpen}>
-                <DialogContent className="w-full max-w-[560px] gap-6 rounded-xl border border-gray-200 bg-white p-8 shadow-lg ring-black/5 sm:max-w-[560px] dark:border-[#3F3F46] dark:bg-[#121212] dark:text-white dark:shadow-2xl dark:shadow-black/60 dark:ring-white/10">
+                <DialogContent className="max-h-[min(90dvh,calc(100dvh-2rem))] w-full max-w-[560px] gap-6 overflow-y-auto rounded-xl border border-gray-200 bg-white p-6 shadow-lg ring-black/5 sm:max-w-[560px] sm:p-8 dark:border-[#3F3F46] dark:bg-[#121212] dark:text-white dark:shadow-2xl dark:shadow-black/60 dark:ring-white/10">
                     <DialogHeader className="gap-2 text-left">
                         <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">Create Organization</DialogTitle>
                         <DialogDescription className="text-sm text-gray-500 dark:text-[#A1A1AA]">
@@ -421,37 +409,6 @@ export default function Sidebar() {
                                 >
                                     Create Organization
                                 </Button>
-                            </div>
-                        </form>
-                    </Form>
-                </DialogContent>
-            </Dialog>
-
-            {/* User rename dialog */}
-            <Dialog open={userRenameOpen} onOpenChange={setUserRenameOpen}>
-                <DialogContent className="bg-sidebar border-sidebar-border">
-                    <DialogHeader>
-                        <DialogTitle>Rename</DialogTitle>
-                        <DialogDescription>Set a display name for your account on this device.</DialogDescription>
-                    </DialogHeader>
-                    <Form {...userForm}>
-                        <form onSubmit={userForm.handleSubmit(handleUserRename)} className="space-y-3">
-                            <FormField
-                                control={userForm.control}
-                                name="display"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Display name</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} placeholder="Your display name" />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <div className="flex justify-end gap-2">
-                                <Button type="button" variant="ghost" onClick={() => setUserRenameOpen(false)}>Cancel</Button>
-                                <Button type="submit">Save</Button>
                             </div>
                         </form>
                     </Form>

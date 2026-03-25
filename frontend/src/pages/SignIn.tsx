@@ -13,8 +13,8 @@ export default function SignInPage() {
     }, [])
 
     return (
-        <div className="relative flex min-h-screen items-center justify-center bg-neutral-50 px-4 dark:bg-background" data-testid="signin-page">
-            <div className="fixed bottom-4 right-4">
+        <div className="relative flex min-h-dvh min-h-screen items-center justify-center bg-neutral-50 px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[env(safe-area-inset-top,0px)] dark:bg-background" data-testid="signin-page">
+            <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom,0px))] right-[max(1rem,env(safe-area-inset-right,0px))]">
                 <ThemeToggle />
             </div>
 

@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Query,
   UseGuards,
   ValidationPipe,
@@ -22,5 +23,11 @@ export class DashboardController {
     @Query() query: GetDashboardQueryDto,
   ): Promise<GetDashboardResponseDto> {
     return this.dashboardService.getDashboard(query);
+  }
+
+  /** Regenerates demo dashboard rows (gated by ENABLE_DASHBOARD_DEMO_SEED). */
+  @Post('demo-seed')
+  async seedDemo(): Promise<{ ok: true; daysSeeded: number }> {
+    return this.dashboardService.runDemoSeedFromApi();
   }
 }
