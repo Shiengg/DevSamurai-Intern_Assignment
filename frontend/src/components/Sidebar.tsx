@@ -260,14 +260,14 @@ export default function Sidebar() {
                                 label="Leads"
                                 active={false}
                                 isCollapsed={isCollapsed}
-                                onClick={() => {}}
+                                onClick={() => { }}
                             />
                             <NavRow
                                 icon={Bot}
                                 label="AI Chatbot"
                                 active={false}
                                 isCollapsed={isCollapsed}
-                                onClick={() => {}}
+                                onClick={() => { }}
                             />
                         </div>
                     </SidebarGroupContent>
@@ -286,28 +286,28 @@ export default function Sidebar() {
                                 label="General"
                                 active={false}
                                 isCollapsed={isCollapsed}
-                                onClick={() => {}}
+                                onClick={() => { }}
                             />
                             <NavRow
                                 icon={Users}
                                 label="Members"
                                 active={false}
                                 isCollapsed={isCollapsed}
-                                onClick={() => {}}
+                                onClick={() => { }}
                             />
                             <NavRow
                                 icon={CreditCard}
                                 label="Subscription"
                                 active={false}
                                 isCollapsed={isCollapsed}
-                                onClick={() => {}}
+                                onClick={() => { }}
                             />
                             <NavRow
                                 icon={Coins}
                                 label="Credits"
                                 active={false}
                                 isCollapsed={isCollapsed}
-                                onClick={() => {}}
+                                onClick={() => { }}
                             />
                         </div>
                     </SidebarGroupContent>
@@ -331,9 +331,12 @@ export default function Sidebar() {
                             <div className="w-6 h-6 bg-secondary rounded-full flex items-center justify-center text-xs">{user?.initials || 'US'}</div>
                         ) : (
                             <>
-                                <span className="flex items-center gap-3">
+                                <span className="flex items-center gap-3 min-w-0">
                                     <div className="w-6 h-6 bg-secondary rounded-full flex items-center justify-center text-xs">{user?.initials || 'US'}</div>
-                                    <span className="text-sm font-medium truncate text-foreground">{user?.displayName || 'User'}</span>
+                                    <span className="min-w-0 flex flex-col items-start leading-tight">
+                                        <span className="text-sm font-medium truncate text-foreground max-w-full">{user?.displayName || 'User'}</span>
+                                        <span className="text-xs truncate text-muted-foreground max-w-full">{user?.email || ''}</span>
+                                    </span>
                                 </span>
                                 <MoreHorizontal size={16} className="text-muted-foreground" />
                             </>
